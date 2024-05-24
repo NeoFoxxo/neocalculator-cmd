@@ -2,32 +2,51 @@
 #include <ctype.h>
 #include <cstdlib>
 #include <iostream>
+#include <vector>
+#include "calc.h"
 
-class Values {
-  public:
-    static int digits[10];
-    static char operation;
-};
-
+using namespace std;
 
 class Extract {
   public:
-    static Values extractValues(const char* values[], int argCount);
+    static int extractValues(const char* values[], int argCount);
 };
 
+int Extract::extractValues(const char* values[], int argCount){
+  vector<int> numbers; 
+  Calc calc;
 
-Values Extract::extractValues(const char* values[], int argCount){
-  Values result; 
   for (int i = 1; i < argCount; i++) {
-    auto currentValue = atof(values[i]);
+    const char* currentValue = values[i];
 
-    if (!isdigit(currentValue)) {
-      result.operation = currentValue;
-    } else {
-      result.digits[i] = currentValue; 
-    };
+    // if digit add to stack
+    if (isdigit(*currentValue)) {
+      int currentDigit = atoi(currentValue);
+      numbers.push_back(currentDigit);
+    }
+    else {
+      char currentOperator = *currentValue;
+      if (numbers.size() == 2) {
+        int result = calc.calculate(currentOperator, numbers.front(), numbers.back());
+        numbers.clear(); // empty array
+        numbers.insert(numbers.begin(), result);
+      }
+      else {
+        const char* nextDigitRaw = values[i+1];
+        int nextDigit = atoi(nextDigitRaw);
+        numbers.push_back(nextDigit);
+
+        int result = calc.calculate(currentOperator, numbers.front(), numbers.back());
+        numbers.clear(); // empty array
+        numbers.insert(numbers.begin(), result);
+
+        i = i+1; // skip 1 step
+      }
+    }
+    // for (int p = 0; p < numbers.size(); p++) {
+    //   cout << "Current Stack" << endl;
+    //   cout << "Digit " << p  << " = " << numbers[p] << endl;
+    // }
   }
-  std::cout << result.digits << std::endl;
-
-  return result;
+  return numbers[0];
 }

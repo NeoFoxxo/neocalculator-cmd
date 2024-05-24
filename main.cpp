@@ -11,7 +11,8 @@ int main(int argCount, const char* args[]){
   };
 
   try {
-    Values result = Extract::extractValues(args, argCount);
+    int result = Extract::extractValues(args, argCount);
+    cout << result << endl;
   }
   catch (...) {
     throw runtime_error("An error occurred");
